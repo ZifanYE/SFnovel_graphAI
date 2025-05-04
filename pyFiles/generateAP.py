@@ -2,10 +2,10 @@ from neo4j import GraphDatabase
 import openai
 
 # --- 配置区 ---
-NEO4J_URI = "bolt://localhost:7687"   
+NEO4J_URI = "bolt://localhost:xxxx"   
 NEO4J_USER = "neo4j"
-NEO4J_PASSWORD = "Huahua1365"    
-OPENAI_API_KEY = "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"     # ⚠️ 改成你自己的 OpenAI Key
+NEO4J_PASSWORD = ""    
+OPENAI_API_KEY = ""     # ⚠️ 改成你自己的 OpenAI Key
 
 
 openai.api_key = OPENAI_API_KEY
