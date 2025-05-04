@@ -1,9 +1,9 @@
 from neo4j import GraphDatabase
 
 # 连接到你的Neo4j数据库
-uri = "bolt://localhost:7687"  # 本地Neo4j
+uri = ""  # 本地Neo4j
 username = "neo4j"
-password = "Huahua1365"
+password = ""
 
 driver = GraphDatabase.driver(uri, auth=(username, password))
 
