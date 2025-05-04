@@ -1,11 +1,16 @@
 import neo4j from 'neo4j-driver';
+import dotenv from 'dotenv';
+// 仅在 Node.js 环境中加载 .env 文件（避免前端环境污染）
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 // Neo4j连接配置
-const NEO4J_URI = process.env.NEO4J_URI || 'bolt://localhost:7687';
+const NEO4J_URI = process.env.NEO4J_URI || 'check your .env file';
 const NEO4J_USER = process.env.NEO4J_USER || 'neo4j';
-const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'Huahua1365';
+const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'check your .env file';
 // OpenAI API 配置
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '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';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 // 建立 Neo4j 连接

@@ -106,7 +106,7 @@ export default function Index() {
           </div>
         </div>
       )}
-      {coverUrl && story &&(
+      {coverUrl && story && (
         <div className="w-[400px] h-[600px] bg-white rounded-xl overflow-hidden shadow-lg">
         {/* 上半部分：封面图像 */}
         <div className="h-[500px] w-full">
@@ -121,7 +121,7 @@ export default function Index() {
         {/* 下半部分：封套文字 */}
         <div className="h-[100px] bg-gray-200 text-black px-4 py-3 flex items-center justify-center border-t-4 border-purple-500 shadow-inner">
           <h2 className="text-3xl font-extrabold text-center tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 drop-shadow-md">
-           {story.match(/Title:\s*(.+?)\n/)?.[1] || "Untitled"}
+           {story.match(/Title:\s*(.+?)\n/)?.[1] ||"Untitled: My Story"} 
           </h2>
         </div>
       </div>
