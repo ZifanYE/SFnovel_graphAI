@@ -5,6 +5,7 @@ export default function Index() {
   const [characters, setCharacters] = useState<any[]>([]);
   const [selectedCharacter, setSelectedCharacter] = useState("");
   const [story, setStory] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
 
   async function generateGraph() {
     const response = await fetch("/api/generate", {
@@ -31,13 +32,15 @@ export default function Index() {
       body: JSON.stringify({ selectedCharacter }),
     });
     const data = await response.json();
+
     setStory(data.story);
+    setCoverUrl(data.imageUrl); // ✅ 设置封面链接
+
   }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start p-8 space-y-6 animate-fadeIn">
-      <h1 className="text-4xl font-bold mb-4 mt-8 text-center">🚀 Future Sci-Fi Novel Generator 🚀</h1>
-
+      <h1 className="text-4xl font-bold mb-4 mt-8 text-center">🚀 Novel AI Generator 🚀</h1>
       <input
         type="text"
         placeholder="Enter the social issue you want to explore..."
@@ -102,6 +105,26 @@ export default function Index() {
             </button>
           </div>
         </div>
+      )}
+      {coverUrl && story &&(
+        <div className="w-[400px] h-[600px] bg-white rounded-xl overflow-hidden shadow-lg">
+        {/* 上半部分：封面图像 */}
+        <div className="h-[500px] w-full">
+          <img
+            src={coverUrl}
+            alt="Cover Image"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        
+    
+        {/* 下半部分：封套文字 */}
+        <div className="h-[100px] bg-gray-200 text-black px-4 py-3 flex items-center justify-center border-t-4 border-purple-500 shadow-inner">
+          <h2 className="text-3xl font-extrabold text-center tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 drop-shadow-md">
+           {story.match(/Title:\s*(.+?)\n/)?.[1] || "Untitled"}
+          </h2>
+        </div>
+      </div>
       )}
 
       {story && (

@@ -10,6 +10,7 @@ if (!apiKey) {
 const openai = new OpenAI({
   apiKey,
   baseURL: "https://api.openai.com/v1",
+  
 });
 
 export default openai;

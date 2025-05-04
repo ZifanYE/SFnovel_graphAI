@@ -22,7 +22,12 @@ export async function runCypher(cypherQuery: string) {
     await session.close();
   }
 }
-
+// ---  ---
+export async function CreateIssueGraph(issue: string) {
+  const issueQuery = `CREATE (:Issue:Novel {name: "${issue}"})`;
+  await runCypher(issueQuery);
+  console.log('✅ issue图谱已经成功写入 Neo4j！');
+}
 // --- 清空 Novel 子图 ---
 export async function clearNovelGraph() {
   const deleteQuery = `
@@ -32,11 +37,68 @@ export async function clearNovelGraph() {
   await runCypher(deleteQuery);
   console.log('🗑 已删除所有 Novel 子图节点和关系。');
 }
+// 提取 AP 节点信息
+export async function fetchAPNodes(): Promise<string> {
+  const session = driver.session();
+  try {
+    const result = await session.run(`MATCH (n:AP) RETURN n.name AS name, labels(n) AS labels`);
+    const descriptions = result.records.map(record => {
+      const name = record.get('name');
+      const labels = record.get('labels').join(',');
+      return `Node: ${name}, Labels: ${labels}`;
+    });
+    return descriptions.join('\n');
+  } finally {
+    await session.close();
+  }
+}
+export async function fetchGraphSummary(): Promise<string> {
+  const session = driver.session();
+  try {
+    const result = await session.run(`
+      MATCH (n)-[r]->(m)
+      RETURN 
+        labels(n) AS from_labels, 
+        properties(n) AS from_properties, 
+        type(r) AS relationship_type, 
+        properties(r) AS relationship_properties, 
+        labels(m) AS to_labels, 
+        properties(m) AS to_properties
+    `);
+
+    const descriptions = result.records.map((record) => {
+      const fromLabels = record.get("from_labels").join(", ");
+      const fromProps = record.get("from_properties");
+      const toLabels = record.get("to_labels").join(", ");
+      const toProps = record.get("to_properties");
+      const relType = record.get("relationship_type");
+      const relProps = record.get("relationship_properties");
+
+      const fromDesc = Object.entries(fromProps)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(", ");
+      const toDesc = Object.entries(toProps)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(", ");
+      const relDesc = Object.keys(relProps).length > 0
+        ? Object.entries(relProps).map(([k, v]) => `${k}: ${v}`).join(", ")
+        : " ";
+
+      return `${fromLabels} (${fromDesc}) is connected to ${toLabels} (${toDesc}) via relationship [${relType}] (${relDesc}).`;
+    });
+
+    return descriptions.join("\n");
+  } finally {
+    await session.close();
+  }
+}
 
 // --- 调用 OpenAI API 生成 Cypher 查询 ---
-export async function generateNovelCypher(): Promise<string> {
+export async function generateNovelCypher(issue: string): Promise<string> {
+  const apData = await fetchGraphSummary(); // 获取 AP 节点信息
+  console.log('AP 节点信息:', apData); // 打印 AP 节点信息
   const systemInstruction = `
-    You are an AI scriptwriter specialized in designing future sci-fi societies. You need to generate Neo4j Cypher queries based on the description. 
+    You are an AI scriptwriter specialized in designing future sci-fi societies. You need to generate Neo4j Cypher queries based on the AP social model${apData}. 
 Note: All nodes should have the "Novel" label, such as (:Person:Novel).
 The locations, people(with name, age,role), relationships and events should be set in a futuristic 2050s Japan city.
 The background should include some social issues—please use your imagination, and add a satirical tone.
@@ -66,7 +128,7 @@ CREATE (john)-[:PARTICIPATED_IN]->(party),
   `;
 
   const userPrompt = `
-    Please create a society set in Tokyo, Japan, in 2050, where technology is extremely advanced but the social class is deeply divided.
+    Please create a society set in Tokyo, Japan, in 2050, related to the social issue:${issue}.
 Please create at least 3 character nodes, 3 location nodes, and 3 event nodes, which should fit the characteristics of the city,
 and establish reasonable relationships.
   `;
@@ -106,16 +168,4 @@ export async function createNovelGraph() {
     await clearNovelGraph();
   }
 
-  console.log('\n开始生成新的小说图谱...请稍等...');
-  const cypherQuery = await generateNovelCypher();
-  console.log('\n--- 生成的 Cypher 语句 ---');
-  console.log(cypherQuery);
-
-  const confirm = prompt('\n是否执行写入 Neo4j？(y/n): ');
-  if (confirm?.toLowerCase() === 'y') {
-    await runCypher(cypherQuery);
-    console.log('✅ 新的小说子图谱已经成功写入 Neo4j！');
-  } else {
-    console.log('❌ 取消执行。');
-  }
 }

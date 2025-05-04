@@ -1,6 +1,6 @@
 // routes/api/generate.ts
 import { json } from "@remix-run/node";
-import { generateNovelCypher, clearNovelGraph, runCypher } from "~/services/graphService";
+import { generateNovelCypher, clearNovelGraph, runCypher, CreateIssueGraph } from "~/services/graphService";
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { driver } from "~/services/graphService"; // 导入 Neo4j 驱动
 
@@ -15,9 +15,10 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // 清空现有的 Novel 子图
   await clearNovelGraph();
+  await CreateIssueGraph(issue); // 创建新的 issue 节点
 
   // 生成 Cypher 查询语句
-  const cypherQuery = await generateNovelCypher();
+  const cypherQuery = await generateNovelCypher(issue);
 
   // 执行 Cypher 查询
   await runCypher(cypherQuery);
@@ -25,6 +26,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // 从 Neo4j 查询角色节点
   const session = driver.session();
+
   const result = await session.run("MATCH (p:Person:Novel) RETURN p.name AS name, p.age AS age, p.role AS role");
   const characters = result.records.map(record => ({
     name: record.get("name"),
