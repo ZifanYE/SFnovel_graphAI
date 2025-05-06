@@ -73,6 +73,15 @@ export default function Index() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {characters.map((char: any) => (
               <div key={char.name} className="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 flex flex-col items-start space-y-2">
+              {char.imageUrl && (
+              <img
+                  src={char.imageUrl}
+                  alt={`${char.name}'s portrait`}
+                  className="w-full h-48 object-cover rounded-md mb-2"
+              />
+              )}
+                
+                
                 <div className="text-xl font-bold">{char.name}</div>
                 <div className="text-sm text-gray-400">Age: {char.age}</div>
                 <div className="text-sm text-gray-400">Role: {char.role}</div>
